@@ -12,9 +12,20 @@ class PostController extends BaseController
     /**
      * Display a listing of the resource.
      */
-    public function posts()
+    public function posts(Request $request)
     {
-        //
+        if($request->filter == 'me'){
+
+            $posts =  Post::where('is_published', true)->where('user_id', Auth::user()->id)->get();
+
+            return $this->sendResponse($posts, 'success');
+
+        }else{
+            $posts =  Post::where('is_published', true)->get();
+
+            return $this->sendResponse($posts, 'success');
+
+        }
     }
 
     /**

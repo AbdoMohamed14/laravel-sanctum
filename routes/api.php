@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\DeviceController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\PostController;
 use Illuminate\Http\Request;
@@ -36,6 +37,8 @@ Route::middleware('auth:sanctum')->group( function () {
     Route::post('post/publish', [PostController::class, 'post_publish']);
 
     Route::get('posts', [PostController::class, 'posts']);
+
+    Route::get('get-device-users/{device_id}', [DeviceController::class, 'get_user_devices']);
 
 });
 

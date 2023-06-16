@@ -57,4 +57,19 @@ class UserController extends BaseController
         return $this->sendResponse($data, 'successfully registerd');
 
     }
+
+
+    public function login(Request $request)
+    {
+        if(Auth::attempt(['email' => $request->email, 'password' => $request->password])){ 
+            $user = Auth::user(); 
+            $data['token'] =  $user->createToken('MyApp')->plainTextToken; 
+            $data['user'] =  $user;
+   
+            return $this->sendResponse($data, 'User login successfully.');
+        } 
+        else{ 
+            return $this->sendError('Unauthorised.', ['error'=>'Unauthorised']);
+        } 
+    }
 }

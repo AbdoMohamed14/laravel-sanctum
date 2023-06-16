@@ -2,42 +2,23 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Controllers\Controller;
+use App\Http\Requests\RegisterUserRequest;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
-use Illuminate\Validation\Rules;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
-use Validator;
 
 class UserController extends BaseController
 {
-    public function register(Request $request)
+    public function register(RegisterUserRequest $request)
     {
         $birthday = $request->birthday;
-
-
-
         $years = Carbon::parse($birthday)->age;
 
         if($years < 18){
             return $this->sendError('your age must be greater than 18 year');
         }
-
-        $validate =  Validator::make($request->all(),[
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:'.User::class],
-            'birthday' => ['required', 'date'],
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
-        ]);
-
-        if($validate->fails()){
-            return $this->sendError('errors', $validate->errors());
-        }
-
-
 
         $user = User::create([
             'name' => $request->name,
@@ -61,12 +42,16 @@ class UserController extends BaseController
 
     public function login(Request $request)
     {
-        if(Auth::attempt(['email' => $request->email, 'password' => $request->password])){ 
-            $user = Auth::user(); 
-            $data['token'] =  $user->createToken('MyApp')->plainTextToken; 
-            $data['user'] =  $user;
-   
-            return $this->sendResponse($data, 'User login successfully.');
+        $user = User::where('email', $request->email);
+
+        if($user){ 
+            if(Hash::check($request->password, $user->password)){
+                Auth::login($user);
+                $data['token'] =  $user->createToken('MyApp')->plainTextToken; 
+                $data['user'] =  $user;
+       
+                return $this->sendResponse($data, 'User login successfully.');
+            }
         } 
         else{ 
             return $this->sendError('Unauthorised.', ['error'=>'Unauthorised']);

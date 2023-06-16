@@ -12,7 +12,7 @@ class PostController extends BaseController
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function posts()
     {
         //
     }
@@ -20,9 +20,15 @@ class PostController extends BaseController
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
+    public function unpublished_posts()
     {
-        //
+        if(Auth::user()->is_admin){
+            $posts = Post::where('is_published', false)->get();
+
+            return $this->sendResponse($posts, 'success');
+        }
+
+        return $this->sendError('Not allowed');
     }
 
     /**

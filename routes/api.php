@@ -33,5 +33,7 @@ Route::middleware('auth:sanctum')->group( function () {
 
     Route::get('post/unpublished', [PostController::class, 'unpublished_posts']);
 
+    Route::post('post/publish', [PostController::class, 'post_publish']);
+
 });
 

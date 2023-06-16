@@ -49,9 +49,32 @@ class PostController extends BaseController
     /**
      * Display the specified resource.
      */
-    public function show(Post $post)
+    public function post_publish(Request $request)
     {
-        //
+        if(Auth::user()->is_admin){
+
+            if($request->status == 1){
+               $post = Post::where('id', $request->id)->first();
+                if(!$post){
+                    return $this->sendError('not found');
+                }
+               $post->update([
+                'is_published' => true,
+               ]);
+               
+               return $this->sendResponse('post published successfully', 'published');
+            }else{
+                $post = Post::where('id', $request->id)->first();
+
+                if(!$post){
+                    return $this->sendError('not found');
+                }
+                $post->delete();
+
+                return $this->sendResponse('post deleted successfully', 'deleted');
+            }
+
+        }
     }
 
     /**

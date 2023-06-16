@@ -33,13 +33,10 @@ class PostController extends BaseController
      */
     public function unpublished_posts()
     {
-        if(Auth::user()->is_admin){
             $posts = Post::where('is_published', false)->get();
 
             return $this->sendResponse($posts, 'success');
-        }
 
-        return $this->sendError('Not allowed');
     }
 
     /**
@@ -62,7 +59,6 @@ class PostController extends BaseController
      */
     public function post_publish(Request $request)
     {
-        if(Auth::user()->is_admin){
 
             if($request->status == 1){
                $post = Post::where('id', $request->id)->first();
@@ -85,30 +81,7 @@ class PostController extends BaseController
                 return $this->sendResponse('post deleted successfully', 'deleted');
             }
 
-        }
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Post $post)
-    {
-        //
-    }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Post $post)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Post $post)
-    {
-        //
-    }
 }

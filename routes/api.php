@@ -40,5 +40,17 @@ Route::middleware('auth:sanctum')->group( function () {
 
     Route::get('get-device-users/{device_id}', [DeviceController::class, 'get_user_devices']);
 
+
+    Route::middleware('is_admin')->group( function () {
+
+        Route::get('post/unpublished', [PostController::class, 'unpublished_posts']);
+    
+        Route::post('post/publish', [PostController::class, 'post_publish']);    
+    
+    });
+
 });
+
+
+
 

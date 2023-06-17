@@ -43,6 +43,7 @@ class PostController extends BaseController
      */
     public function store(StorePostRequest $request)
     {
+        return Auth::user();
 
         Post::create([
             'title' => $request->title,

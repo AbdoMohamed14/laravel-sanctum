@@ -14,18 +14,17 @@ class PostController extends BaseController
      */
     public function posts(Request $request)
     {
+
+        $posts =  Post::where('is_published', true)->get();
+
         if($request->filter == 'me'){
 
-            $posts =  Post::where('is_published', true)->where('user_id', Auth::user()->id)->get();
-
-            return $this->sendResponse($posts, 'success');
-
-        }else{
-            $posts =  Post::where('is_published', true)->get();
-
-            return $this->sendResponse($posts, 'success');
+           $posts = $posts->where('user_id', Auth::user()->id)->toArray();
 
         }
+
+        return $this->sendResponse($posts, 'success');
+
     }
 
     /**
@@ -57,25 +56,18 @@ class PostController extends BaseController
     /**
      * Display the specified resource.
      */
-    public function post_publish(Request $request)
+    public function post_publish_or_delete($id, Request $request)
     {
-
             if($request->status == 1){
-               $post = Post::where('id', $request->id)->first();
-                if(!$post){
-                    return $this->sendError('not found');
-                }
+               $post = Post::findOrFail($id);
                $post->update([
                 'is_published' => true,
                ]);
                
                return $this->sendResponse('post published successfully', 'published');
             }else{
-                $post = Post::where('id', $request->id)->first();
-
-                if(!$post){
-                    return $this->sendError('not found');
-                }
+                
+                $post = Post::findOrFail($request->id);
                 $post->delete();
 
                 return $this->sendResponse('post deleted successfully', 'deleted');

@@ -4,24 +4,25 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Requests\StorePostRequest;
 use App\Models\Post;
+use App\Services\PostService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class PostController extends BaseController
 {
+    public $postService;
+
+    public function __construct(PostService $postService)
+    {
+        $this->postService = $postService;
+    }
     /**
-     * Display a listing of the resource.
+     * Display a listing of the published posts for all users or login user depending on filter param in request.
      */
-    public function posts(Request $request)
+    public function published_posts(Request $request)
     {
 
-        $posts =  Post::where('is_published', true)->get();
-
-        if($request->filter == 'me'){
-
-           $posts = $posts->where('user_id', Auth::user()->id)->toArray();
-
-        }
+        $posts = $this->postService->published_posts($request);
 
         return $this->sendResponse($posts, 'success');
 
@@ -43,15 +44,13 @@ class PostController extends BaseController
      */
     public function store(StorePostRequest $request)
     {
-        return Auth::user();
+        $data = $this->postService->create($request);
 
-        Post::create([
-            'title' => $request->title,
-            'content' => $request->content,
-            'user_id' => Auth::user()->id,
-        ]);
+        if(! $data){
+            return $this->sendError('!! Ops some thing went wrong','',500);
+        }
 
-        return $this->sendResponse('post added successfully.', 'success');
+        return $this->sendResponse('success', 'Post Created Successfully.');
     }
 
     /**

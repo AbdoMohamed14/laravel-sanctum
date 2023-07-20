@@ -4,58 +4,42 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Requests\RegisterUserRequest;
 use App\Models\User;
-use Carbon\Carbon;
+use App\Services\UserService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 
 class UserController extends BaseController
 {
-    public function register(RegisterUserRequest $request)
+    public UserService $userService;
+
+    public function __construct(UserService $userService)
     {
-        $birthday = $request->birthday;
-        $years = Carbon::parse($birthday)->age;
+        $this->userService = $userService;
+    }
 
-        if($years < 18){
-            return $this->sendError('your age must be greater than 18 year');
-        }
+    public function register(RegisterUserRequest $request)
+    {        
+        $check_age = $this->userService->check_user_age($request->birthday);
 
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'birthday' => $request->birthday,
-            'is_admin' => 0,
-            'password' => Hash::make($request->password),
-        ]);
+        if(! $check_age){return $this->sendError('you age is must be over than 18 years');}
 
-        Auth::login($user);
+        $registerd_user = $this->userService->create($request);
 
-        $data = [
-            'user' => $user,
-            'token' => $user->createToken('MyApp')->plainTextToken,
-        ];
-
-        return $this->sendResponse($data, 'successfully registerd');
+        return $this->sendResponse($registerd_user, 'successfully registerd');
 
     }
 
 
     public function login(Request $request)
     {
-        $user = User::where('email', $request->email)->first();
+        $data = $this->userService->login($request->only('email', 'password'));
 
-        if($user){ 
-            if(Hash::check($request->password, $user->password)){
-                Auth::login($user);
-                $data['token'] =  $user->createToken('MyApp')->plainTextToken; 
-                $data['user'] =  $user;
-       
-                return $this->sendResponse($data, 'User login successfully.');
-            }
+        if(! $data){
+            return $this->sendError("wrong information please try again");
         } 
-        else{ 
-            return $this->sendError('Unauthorised.', ['error'=>'Unauthorised']);
-        } 
+
+        return $data;
     }
 
 }
